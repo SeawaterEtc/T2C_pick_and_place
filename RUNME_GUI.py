@@ -29,9 +29,9 @@ class RUNME_GUI:
 
     def command_robot_arm_page(self):
         self.clear_frame()
-        tk.Label(self.main_frame, text="Command The Robot", font=("Arial", 16)).pack(pady=10)
-        tk.Button(self.main_frame, text="Send Coordinate to Robot", command=self.send_coordinate_to_robot_page, width=30).pack(pady=5)
-        tk.Button(self.main_frame, text="Robot Follow the Coordinates", command=self.robot_follow_coordinate_page, width=30).pack(pady=5)
+        tk.Label(self.main_frame, text="Command The Robot to pick up", font=("Arial", 16)).pack(pady=10)
+        tk.Button(self.main_frame, text="Stationary Objects", command=self.send_coordinate_to_robot_page, width=30).pack(pady=5)
+        tk.Button(self.main_frame, text="Moving Objects", command=self.robot_follow_coordinate_page, width=30).pack(pady=5)
         tk.Button(self.main_frame, text="Back", command=self.main_page, width=30).pack(pady=5)
 
         # Establish socket connection if not already connected
@@ -245,9 +245,6 @@ class RUNME_GUI:
             self.send_socket_data(data)
 
             time.sleep(15)
-            
-        # # Clear the Tmp_position.txt file after processing
-        # open('T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_position.txt', 'w').close()
 
         self.command_robot_arm_page()
 

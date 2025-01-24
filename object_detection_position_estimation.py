@@ -38,12 +38,11 @@ def draw_oriented_bounding_box(image, box, cls, color=(0, 255, 0), thickness=2):
     cv2.putText(image, f"({center[0]}, {center[1]})", (center[0] + 10, center[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
     cv2.putText(image, names[int(cls)], (center[0] + 10, center[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
-def estimate_position(center, matrix_coefficients, distortion_coefficients, rvec, tvec):
+def estimate_position(center, matrix_coefficients, distortion_coefficients):
     center = np.array([[center]], dtype=np.float32)
     center_undistorted = cv2.undistortPoints(center, matrix_coefficients, distortion_coefficients)
-    world_points, _ = cv2.projectPoints(center_undistorted, rvec, tvec, matrix_coefficients, distortion_coefficients)
-    real_x = world_points[0][0][0] * 12000
-    real_y = world_points[0][0][1] * 12000
+    real_x = center_undistorted[0][0][0] * 1000
+    real_y = center_undistorted[0][0][1] * 1000
     return real_x, real_y
 
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)

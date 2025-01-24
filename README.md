@@ -5,8 +5,8 @@ This repository contain the code to command ABB_CRB_15000 robot arm to pick up o
 
 | Auto Pick and Place | Manual Pick and Place |
 |---------------------|-----------------------|
-| ![Auto Pick](path/to/auto_pick.gif) | ![Manual Pick](path/to/manual_pick.gif) |
-| ![Auto Place](path/to/auto_place.gif) | ![Manual Place](path/to/manual_place.gif) |
+| ![Auto Pick and Place](T2C_PickAndPlace/Data/gif/AutoPickAndPlace.gif) | ![Manual Pick](path/to/manual_pick.gif) |
+
 
 ## Set up and run
 By cloning this repository and having python 3.11 in your system. You can cd to the directory install all the requrments using: 
@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 You can extract the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
 
-Before running the simulation or real station, please ensure that the port are set up correctly. The RUNME_GUI.py line 32 need to adjust accordingly: 
+Before running the simulation or real station, please ensure that the port are set up correctly. The RUNME_GUI.py line 43 need to adjust accordingly: 
 
 ```python
     def connect_to_robot(self):
