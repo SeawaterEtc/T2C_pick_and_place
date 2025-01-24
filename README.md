@@ -9,15 +9,31 @@ This repository contain the code to command ABB_CRB_15000 robot arm to pick up o
 
 
 ## Set up and run
-By cloning this repository and having python 3.11 in your system. You can cd to the directory install all the requrments using: 
+
+### Step 1: Prerequisites
+
+By cloning/downloading this repository and having python 3.11 in your system. You can cd to the directory, for example,  (C:\Users\USER\Learn_Coding\T2C_Pick_And_Place> ) install all the requrments using: 
 ```bash
 pip install -r requirements.txt
 ```
 
-##### Please notice that the code run using python script on top of script. If you are not on top of the directory, you will need to adjust the path accordingly.
+### Step 2: Please notice that the code run using python script on top of script. If you are not on top of the directory, you will need to adjust the path accordingly.
 
+Here is a few example of where you are. 
 
-### RUNME_GUI
+if 
+```bash
+C:\Users\USER\Learn_Coding\T2C_PickAndPlace>
+```
+Then you are inside the directory, RUNME.GUI code can't be run, because it won't be able to find other scripts. 
+
+if 
+```bash
+C:\Users\USER>Learn_Coding>
+```
+Then you are not inside the directory, you can run the code.
+
+### Step 3: RUNME_GUI and Robot Studio Simulation
 
 You can extract the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
 
@@ -33,3 +49,7 @@ Before running the simulation or real station, please ensure that the port are s
         # HOST = '192.168.125.1'
         # PORT = 1025 
 ```
+
+Then you need to start the simulation in Robot Studio.
+
+And finally, you can run the RUNME_GUI.py to start the GUI. 
