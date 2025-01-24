@@ -1,0 +1,14 @@
+Now, the most difficult problem is with the way to get 3D coordinate of the object (x, y, z) with 99% accuracy. 
+
+If we can just look at the object and know the (x,y,z) instantly we will be able to use robot effectively. 
+
+Yes I have an AI model that can detect an object, but I still don't know the (x,y,z of the object in the real world). 
+
+How can I know it? 
+
+for the current method of using one camera, the OPENCV researcher have found a few method, what are they? 
+
+I am researching the ways to do it, I think the solution right now is to create a spring like suction mechanism to pick up objects. In finding x,y,z of the objects, the hardest one is z, but since the work space is flat having spring like suctions gripper that can be pressed down toward the object without issues would still be fine. 
+
+
+But still, I need to find a way to know the exact x,y,z of the object using one camera or more. 

@@ -1,0 +1,711 @@
+ctrl + q and shift + q to comment and uncomment
+
+
+
+
+
+
+
+
+
+
+First attempt to solve the problem:
+
+
+
+
+
+
+
+
+
+
+
+MODULE Pick_and_Place
+    CONST robtarget ws_center_target := [[-0.8,0.02,0.03],[0.999931,-0.00445853,0.000457223,-0.0108219],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];    
+    CONST robtarget Target_1:=[[415.781931202,30.53271592,156.659466494],[0.714378993,-0.003613446,-0.002842951,-0.699743893],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Target_2:=[[415.781931202,-71.280125462,156.659466494],[0.714378993,-0.003613446,-0.002842951,-0.699743893],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Target_3:=[[415.781931202,123.008495333,156.659466494],[0.714378993,-0.003613446,-0.002842951,-0.699743893],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    !***************************************************************************
+    !* Variable Section *
+    !***************************************************************************
+
+    VAR extjoint extj1;    
+    VAR robtarget Next_Target;
+    VAR num value2;
+    VAR num total;
+    VAR num value1;
+    VAR num x;
+    VAR num y;
+    VAR num z;
+    VAR bool oky;
+    VAR bool ok;
+    VAR string target;
+    VAR string data;
+    VAR string pos_x;
+    VAR string pos_y;
+    VAR pos p1;
+    VAR socketdev client_socket;
+    VAR confdata cd1;
+    VAR orient o1;
+    VAR socketdev temp_socket;
+    VAR socketstatus state;
+
+!    !***************************************************************************
+!    !* CONST and WorkSpace Config *
+!    !***************************************************************************
+
+!    CONST robtarget Target_20:=[[435.404,44.599,90],[0,0,1,0],[0,0,-1,0],[9000000000,9000000000,9000000000,9000000000,9000000000,9000000000]];
+
+!    ! tool tip for reference
+!    PERS tooldata tool2:=[TRUE,[[-53.619,0.072,146.999],[1,0,0,0]],[1,[-56.457,-4.303,139.607],[1,0,0,0],0,0,0]];
+
+!    ! target that is not using
+!    CONST robtarget Van1 := [[1.73,-11.95,-302.69],[0.999709,-0.00457785,0.000595314,0.0236952],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+!    ! Home terget
+!    CONST robtarget hometarget := [[429.79,-127.04,-391.72],[0.999912,-0.00462696,0.000539876,0.0124357],[0,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+
+!    ! coordinate of the world - for adjusting the coordinate system of the robot
+!    PERS wobjdata wobj1 := [FALSE,TRUE,"",[[309.7897,-102.1758,147.1015],[0.002842951,-0.6997439,-0.714379,0.003613446]],[[0,0,0],[1,0,0,0]]];
+
+!    ! offset target - the target that will be used to move the robot - center of the work space
+!    CONST robtarget ws_center_target := [[-0.8,0.02,0.03],[0.999931,-0.00445853,0.000457223,-0.0108219],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+
+!    ! New targets based on ws_center_target
+!!    CONST robtarget target_1 := [[-0.75,0.02,0.03],[0.999931,-0.00445853,0.000457223,-0.0108219],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+!!    CONST robtarget target_2 := [[-0.85,0.02,0.03],[0.999931,-0.00445853,0.000457223,-0.0108219],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+!!    CONST robtarget target_3 := [[-0.8,0.07,0.03],[0.999931,-0.00445853,0.000457223,-0.0108219],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+
+    !***************************************************************************
+    !* Program Section *
+    !***************************************************************************
+
+    PROC main()
+        MoveJ hometarget, v100, z50, tool0\WObj:=wobj1;
+        SocketConnect;
+    
+        WHILE TRUE DO
+            state := SocketGetStatus(client_socket);
+            IF state = SOCKET_CONNECTED THEN
+                SocketReceive client_socket\Str:=data, \Time:=WAIT_MAX;
+                SocketSend client_socket\Str:="Data received, processing...";
+    
+                ! Parse received data (format: "x,y,z,bin_target")
+                ok := ParseData(data, p1, target);
+    
+                IF ok THEN
+                    ! Move to pick up object using MoveOffXYZ
+                    Next_Target := MoveOffXYZ(p1);
+    
+                    ! Move to the specified target
+                    IF target = "1" THEN
+                        MoveToTarget(target_1);
+                    ELSEIF target = "2" THEN
+                        MoveToTarget(target_2);
+                    ELSEIF target = "3" THEN
+                        MoveToTarget(target_3);
+                    ENDIF
+    
+                    ! Move back to home after pick and place
+                    MoveJ hometarget, v100, z50, tool0\WObj:=wobj1;
+    
+                    TPWrite "Client sent message - " + data;
+                    SocketSend client_socket\Str:="Process completed.";
+                ELSE
+                    TPWrite "Error: Failed to parse string to position.";
+                ENDIF
+            ENDIF
+        ENDWHILE
+    ENDPROC
+    
+    FUNC bool ParseData(string input, VAR pos position, VAR string target)
+        VAR string temp;
+        VAR num idx1;
+        VAR num idx2;
+        VAR num idx3;
+        VAR num x;
+        VAR num y;
+        VAR num z;
+        VAR bool result;
+        VAR bool ok;
+    
+        result := FALSE;
+    
+        ! Find commas
+        idx1 := StrFind(input, 0, ",");
+        idx2 := StrFind(input, idx1 + 1, ",");
+        idx3 := StrFind(input, idx2 + 1, ",");
+    
+        IF idx1 > 0 AND idx2 > 0 AND idx3 > 0 THEN
+            ! Extract x, y, z, and target values
+            ok := StrToVal(StrPart(input, 0, idx1), x);
+            ok := ok AND StrToVal(StrPart(input, idx1 + 1, idx2 - idx1 - 1), y);
+            ok := ok AND StrToVal(StrPart(input, idx2 + 1, idx3 - idx2 - 1), z);
+            target := StrPart(input, idx3 + 1, StrLen(input) - idx3 - 1);
+    
+            IF ok THEN
+                position.x := x;
+                position.y := y;
+                position.z := z;
+                result := TRUE;
+            ENDIF
+        ENDIF
+    
+        RETURN result;
+    ENDFUNC
+
+    FUNC robtarget MoveOffXYZ(pos p)
+        VAR robtarget newofftarget;
+        newofftarget:=offs(ws_center_target,p.x,p.y,p.z);
+        !offset xyz pos from Home target
+        MoveJ Offs(newofftarget,0,0,-50),v100,z100,tool0\WObj:=wobj1;
+        MoveL newofftarget,v100,z100,tool0\WObj:=wobj1;
+        WaitTime 2;
+        MoveL Offs(newofftarget,0,0,-50),v100,z100,tool0\WObj:=wobj1;
+        RETURN newofftarget;
+    ENDFUNC
+
+    PROC MoveToTarget(robtarget target)
+        MoveJ target,v100,z50,tool0\WObj:=wobj1;
+        MoveL target,v100,z50,tool0\WObj:=wobj1;
+        WaitTime 2;
+        MoveL Offs(target,0,0,-50),v100,z50,tool0\WObj:=wobj1;
+    ENDPROC
+
+    PROC SocketConnect()
+        ! Create, bind, listen, and accept the socket connection
+        SocketCreate temp_socket;
+        SocketBind temp_socket,"127.0.0.1",55000;
+        SocketListen temp_socket;
+        SocketAccept temp_socket,client_socket,\Time:=WAIT_MAX;
+        TPWrite "Socket connection established.";
+    ENDPROC
+
+    FUNC num StrFind(string input, num startPos, string delimiter)
+        VAR num idx;
+        idx := startPos;
+        WHILE idx < StrLen(input) DO
+            IF StrPart(input, idx, 1) = delimiter THEN
+                RETURN idx;
+            ENDIF
+            idx := idx + 1;
+        ENDWHILE
+        RETURN -1; ! Return -1 if the delimiter is not found
+    ENDFUNC
+    
+    FUNC string StrPart(string input, num startPos, num length)
+        VAR string result;
+        VAR num i;
+    
+        result := "";
+        FOR i FROM startPos TO startPos + length - 1 DO
+            result := result + StrPart(input, i, 1);
+        ENDFOR
+        RETURN result;
+    ENDFUNC
+
+ENDMODULE
+
+
+
+
+
+
+
+
+
+
+
+The problem: 
+
+"Okay, let's discuss about the way to program robot in Robot Studio. The only way to do it is to define the paths&target first, then sync it to the RAPID, then program the RAPID and sync it back. For my case, I am trying to pun everything in a RAPID program and sync it to the station. Why it can't work?"
+
+
+
+
+
+
+
+
+
+
+When working with ABB RobotStudio, the process of programming and synchronizing between the virtual station and the RAPID environment involves specific constraints. Here's an explanation of why defining everything in RAPID and syncing it to the station may not work:
+
+---
+
+### **1. Targets Must Be Linked to the Station**
+RobotStudio operates with a physical or virtual robot's station model. When you define targets in RAPID only and sync them to the station, they might not be correctly recognized because:
+- Targets in RAPID are not automatically linked to the 3D model in the station.
+- The robot needs to verify that these positions are within its working envelope and associated with a defined tool and work object in the station.
+
+**Solution**: Define the targets and paths in RobotStudio first. This ensures they are properly placed and linked to the station model. Once defined, you can sync them to RAPID and use them programmatically.
+
+---
+
+### **2. Lack of Associated Frame Information**
+RobotStudio requires that targets are defined relative to a tool (`tool0`) and a work object (`wobj1`). When targets are created purely in RAPID, the station might not recognize the reference frame because:
+- The station doesn't automatically know the relationship between the robot base, the tool, and the work object for those targets.
+- This can cause synchronization to fail or lead to errors when attempting to execute moves.
+
+**Solution**: Ensure that the `wobj1` and tool data (`tool0`) are fully defined in the station and referenced properly in RAPID.
+
+---
+
+### **3. Station Geometry Validation**
+When syncing from RAPID to the station:
+- RobotStudio validates that the targets are within the reachable workspace.
+- It checks if the robot can achieve the defined orientations and configurations.
+
+If your RAPID-defined targets fail these checks (e.g., due to unreachable positions or invalid orientations), synchronization will fail.
+
+**Solution**: Use the station's geometry to validate and fine-tune target positions before programming them in RAPID.
+
+---
+
+### **4. Path Visualization and Calibration**
+In RobotStudio:
+- Paths and targets are visualized and linked to the robot's physical movement.
+- Calibration with the physical robot or simulated environment ensures accurate movement.
+
+If you skip the target definition in the station, you lose these benefits. The RAPID code might work in theory but fail in practice due to alignment or reachability issues.
+
+---
+
+### **5. RobotStudio Design Philosophy**
+RobotStudio is designed to:
+- Simulate and visualize the robot's movement in a virtual 3D environment.
+- Enable programming of paths and targets directly on the model for better accuracy.
+
+This design philosophy assumes that target creation and initial path programming occur in the station, not in RAPID alone.
+
+---
+
+### **Why Does the Hometarget Work?**
+The `hometarget` works because:
+- It likely corresponds to a pre-defined, reachable position near the robot's base.
+- Its configuration and orientation are consistent with the robot's initial state.
+- It doesn't rely on complex references to work objects or tools.
+
+---
+
+### **Best Practices**
+To make your workflow more effective:
+1. **Define Targets in the Station First**:
+   - Use RobotStudio's 3D interface to place and define targets and paths.
+   - Sync these targets to RAPID.
+
+2. **Program in RAPID**:
+   - Reference the synchronized targets in your RAPID code.
+   - Use dynamic or calculated targets if needed, but base them on pre-defined work objects and tools.
+
+3. **Validate and Sync Back**:
+   - Sync your RAPID program back to the station.
+   - Test the program in the simulation environment before deploying it.
+
+---
+
+By aligning with RobotStudio's intended workflow, you can minimize synchronization issues and ensure reliable robot operation. Let me know if you'd like further clarification or a detailed example!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The workflow you described—defining paths and targets in RobotStudio, synchronizing with the RAPID program, and then programming RAPID and syncing it back—is indeed the standard method.
+
+When you try to define everything directly in a RAPID program and synchronize it to the station, it might not work due to a few potential reasons:
+
+1. **RobotStudio-Specific Data:**
+   RobotStudio stores specific data about the environment, tools, and work objects that may not be fully represented in a standalone RAPID program. When defining everything in RAPID, you might miss some of these crucial settings.
+
+2. **Synchronization Issues:**
+   The synchronization process from RAPID to RobotStudio involves more than just loading the code. RobotStudio uses additional information, like configurations and specific paths that it interprets and translates into its simulation environment. If this information is not well-defined or not present in your RAPID code, synchronization issues can occur.
+
+3. **Tool and Work Objects:**
+   Defining tools and work objects in RobotStudio is important for accurate simulations and executions. If these are not properly defined in your RAPID program or if there are discrepancies, it could cause the synchronization to fail.
+
+4. **Motion Parameters:**
+   Detailed path and motion parameters set within RobotStudio might not translate exactly when coded manually in RAPID. This can lead to differences in how movements are interpreted and executed within the simulation.
+
+5. **Error Handling:**
+   RobotStudio has built-in mechanisms for handling potential errors and warnings during the path and target definition phase. These mechanisms might not be available or as robust when you define everything manually in RAPID.
+
+To work around this, you could try the following steps:
+
+1. **Hybrid Approach:**
+   Define the basic structure in RAPID but use RobotStudio for detailed path adjustments and fine-tuning. This way, you can leverage the strengths of both methods.
+
+2. **Verification:**
+   Ensure that all necessary elements like tools, work objects, and robot configurations are correctly defined in your RAPID program. Double-check the synchronization settings and the compatibility between RobotStudio and RAPID.
+
+3. **Debugging:**
+   Use RobotStudio’s debugging tools to identify any issues with the RAPID code when attempting to sync. This can provide insights into what might be missing or incorrectly defined.
+
+Would you like me to help you with any specific part of your RAPID code or RobotStudio setup?
+
+
+
+
+
+
+
+
+
+
+Second attempt to solve the problem:
+
+
+
+
+
+
+
+
+
+
+MODULE Pick_and_Place
+    !***************************************************************************
+    !* CONST and PERSISTENT Definitions *
+    !***************************************************************************
+    CONST robtarget ws_center_target := [[415.0, 30.0, 150.0], [0.714378993, -0.003613446, -0.002842951, -0.699743893], [0, -1, 1, 0], [9E+09, 9E+09, 9E+09, 9E+09, 9E+09, 9E+09]];
+    CONST robtarget Target_1 := [[415.78, 30.53, 156.66], [0.714378993, -0.003613446, -0.002842951, -0.699743893], [0, -1, 1, 0], [9E+09, 9E+09, 9E+09, 9E+09, 9E+09, 9E+09]];
+    CONST robtarget Target_2 := [[415.78, -71.28, 156.66], [0.714378993, -0.003613446, -0.002842951, -0.699743893], [0, -1, 1, 0], [9E+09, 9E+09, 9E+09, 9E+09, 9E+09, 9E+09]];
+    CONST robtarget Target_3 := [[415.78, 123.00, 156.66], [0.714378993, -0.003613446, -0.002842951, -0.699743893], [0, -1, 1, 0], [9E+09, 9E+09, 9E+09, 9E+09, 9E+09, 9E+09]];
+    CONST robtarget hometarget := [[429.79, -127.04, -391.72], [0.999912, -0.00462696, 0.000539876, 0.0124357], [0, -1, 1, 0], [9E+09, 9E+09, 9E+09, 9E+09, 9E+09, 9E+09]];
+    
+    PERS wobjdata wobj1 := [FALSE, TRUE, "", [[415.0, 30.0, 150.0], [0.714378993, -0.003613446, -0.002842951, -0.699743893]], [[0, 0, 0], [1, 0, 0, 0]]];
+
+    VAR robtarget Next_Target;
+    VAR pos p1;
+    VAR string target;
+    VAR string data;
+    VAR socketdev client_socket;
+    VAR socketdev temp_socket;
+    VAR robtarget targetRobTarget;
+
+    !***************************************************************************
+    !* Main Program *
+    !***************************************************************************
+    PROC main()
+        MoveJ hometarget, v100, z50, tool0\WObj:=wobj1;
+        SocketConnect;
+    
+        WHILE TRUE DO
+            IF SocketGetStatus(client_socket) = SOCKET_CONNECTED THEN
+                SocketReceive client_socket\Str:=data, \Time:=WAIT_MAX;
+                TPWrite "Received data: " + data;
+    
+                IF ParseData(data, p1, target) THEN
+                    Next_Target := MoveOffXYZ(p1);
+                    TPWrite "Parsed data. Resolving target: " + target;
+    
+                    IF target = "1" THEN
+                        targetRobTarget := Target_1;
+                    ELSEIF target = "2" THEN
+                        targetRobTarget := Target_2;
+                    ELSEIF target = "3" THEN
+                        targetRobTarget := Target_3;
+                    ELSE
+                        TPWrite "Error: Invalid target specified.";
+                        CONTINUE;
+                    ENDIF
+    
+                    TPWrite "Moving through path to resolved target.";
+                    MoveThroughPath(Next_Target, targetRobTarget);
+                    MoveJ hometarget, v100, z50, tool0\WObj:=wobj1;
+                    TPWrite "Operation complete for data: " + data;
+                ELSE
+                    TPWrite "Error: Failed to parse string to position.";
+                ENDIF
+            ELSE
+                TPWrite "Socket not connected.";
+            ENDIF
+        ENDWHILE
+    ENDPROC
+    
+    PROC MoveThroughPath(robtarget startTarget, robtarget endTarget)
+        TPWrite "Starting path movement to resolved target.";
+        MoveToTarget(startTarget, endTarget);
+    ENDPROC
+    
+    PROC MoveToTarget(robtarget startTarget, robtarget endTarget)
+        TPWrite "Moving from start target to end target.";
+        MoveJ startTarget, v100, z50, tool0\WObj:=wobj1;
+        MoveL endTarget, v100, z50, tool0\WObj:=wobj1;
+        WaitTime 2;
+        MoveL Offs(endTarget, 0, 0, -50), v100, z50, tool0\WObj:=wobj1;
+        TPWrite "Reached end target.";
+    ENDPROC
+
+    FUNC robtarget MoveOffXYZ(pos p)
+        VAR robtarget newOffTarget := Offs(ws_center_target, p.x, p.y, p.z);
+        TPWrite "Moving to offset position.";
+        MoveJ Offs(newOffTarget, 0, 0, -50), v100, z100, tool0\WObj:=wobj1;
+        MoveL newOffTarget, v100, z100, tool0\WObj:=wobj1;
+        WaitTime 2;
+        MoveL Offs(newOffTarget, 0, 0, -50), v100, z100, tool0\WObj:=wobj1;
+        RETURN newOffTarget;
+    ENDFUNC
+    PROC SocketConnect()
+        SocketCreate temp_socket;
+        SocketBind temp_socket, "127.0.0.1", 55000;
+        SocketListen temp_socket;
+        SocketAccept temp_socket, client_socket, \Time:=WAIT_MAX;
+        TPWrite "Socket connection established.";
+    ENDPROC
+
+    FUNC bool ParseData(string input, VAR pos position, VAR string target)
+        VAR string tempX;
+        VAR string tempY;
+        VAR string tempZ;
+        VAR num idx1;
+        VAR num idx2;
+        VAR num idx3;
+        VAR bool success;
+    
+        ! Initialize success to FALSE
+        success := FALSE;
+    
+        ! Find the positions of the commas
+        idx1 := StrFind(input, 0, ",");
+        idx2 := StrFind(input, idx1 + 1, ",");
+        idx3 := StrFind(input, idx2 + 1, ",");
+    
+        ! Ensure all indices are valid
+        IF idx1 > 0 AND idx2 > 0 AND idx3 > 0 THEN
+            ! Extract substrings for x, y, z, and target
+            tempX := StrPart(input, 0, idx1);
+            tempY := StrPart(input, idx1 + 1, idx2 - idx1 - 1);
+            tempZ := StrPart(input, idx2 + 1, idx3 - idx2 - 1);
+            target := StrPart(input, idx3 + 1, StrLen(input) - idx3 - 1);
+    
+            ! Convert strings to numeric values
+            IF StrToVal(tempX, position.x) AND
+               StrToVal(tempY, position.y) AND
+               StrToVal(tempZ, position.z) THEN
+                success := TRUE;
+            ENDIF
+        ENDIF
+    
+        RETURN success;
+    ENDFUNC
+
+ENDMODULE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Attempt 3 
+
+https://library.e.abb.com/public/688894b98123f87bc1257cc50044e809/Technical%20reference%20manual_RAPID_3HAC16581-1_revJ_en.pdf
+
+
+
+VAR num x;
+VAR num y;
+VAR num z;
+VAR robtarget Next_Target;
+VAR pos p1;
+VAR string target;
+VAR string data;
+VAR socketdev client_socket;
+VAR socketdev temp_socket;
+VAR robtarget targetRobTarget;
+VAR string tempX;
+VAR string tempY;
+VAR string tempZ;
+VAR string tempTarget;
+VAR num idx0;
+VAR num idx1;
+VAR num idx2;
+VAR num idx3;
+VAR bool success;    
+PROC main()
+    MoveJ home, v100, z50, tool2\WObj:=wobj0;
+    SocketConnect;
+
+    WHILE TRUE DO
+        IF SocketGetStatus(client_socket) = SOCKET_CONNECTED THEN
+            SocketReceive client_socket\Str:=data, \Time:=WAIT_MAX;    
+
+                ! Find indices of the commas
+                idx1 := StrFind(data, 1, ",");
+                idx2 := StrFind(data, idx1 + 1, ",");
+                idx3 := StrFind(data, idx2 + 1, ",");
+            
+                ! Ensure all indices are valid
+                IF idx1 > 0 AND idx2 > 0 AND idx3 > 0 THEN
+                    ! Extract substrings for x, y, z, and target
+                    tempX := StrPart(data, 1, idx1 - 1);
+                    tempY := StrPart(data, idx1 + 1, idx2 - idx1 - 1);
+                    tempZ := StrPart(data, idx2 + 1, idx3 - idx2 - 1);
+                    tempTarget := StrPart(data, idx3 + 1, StrLen(data) - idx3);
+                    target := tempTarget;
+            
+                    ! Convert strings to numeric values
+                    IF StrToVal(tempX, x) AND
+                       StrToVal(tempY, y) AND
+                       StrToVal(tempZ, z) THEN
+                    ENDIF
+                ENDIF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# successful attemt
+
+MODULE Module1
+    VAR num x;
+    VAR num y;
+    VAR num z;
+    VAR robtarget Object_Target;
+    VAR pos p1;
+    VAR num target;
+    VAR string data;
+    VAR socketdev client_socket;
+    VAR socketdev temp_socket;
+    VAR robtarget targetRobTarget;
+    VAR string tempX;
+    VAR string tempY;
+    VAR string tempZ;
+    VAR string tempTarget;
+    VAR num idx0;
+    VAR num idx1;
+    VAR num idx2;
+    VAR num idx3;
+    VAR bool success;
+    VAR robtarget WorkSpaceCenter:=[[381.680225575,0,-5.988965363],[0,1,0,0],[0,0,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+
+    PROC main()
+        MoveJ home,v1000,z100,tool2\WObj:=wobj0;
+        SocketConnect;
+
+        WHILE TRUE DO
+            ! socket sent in "1,1,1,1"
+            IF SocketGetStatus(client_socket)=SOCKET_CONNECTED THEN
+                SocketReceive client_socket\Str:=data,\Time:=WAIT_MAX;
+                ConvertSocketStrToPose(data);
+                IF target=1 THEN
+                    PickToIncenerationBin;
+
+                ELSEIF target=2 THEN
+                    PickToRecyclingBin;
+
+                ENDIF
+            ENDIF
+        ENDWHILE
+    ENDPROC
+
+    PROC SocketConnect()
+        SocketCreate temp_socket;
+        SocketBind temp_socket,"127.0.0.1",55000;
+        SocketListen temp_socket;
+        SocketAccept temp_socket,client_socket,\Time:=WAIT_MAX;
+        TPWrite "Socket connection established.";
+    ENDPROC
+
+    PROC ConvertSocketStrToPose(string data)
+        ! Find indices of the commas
+        idx1:=StrFind(data,1,",");
+        idx2:=StrFind(data,idx1+1,",");
+        idx3:=StrFind(data,idx2+1,",");
+
+        ! Ensure all indices are valid
+        IF idx1>0 AND idx2>0 AND idx3>0 THEN
+            ! Extract substrings for x, y, z, and target
+            tempX:=StrPart(data,1,idx1-1);
+            tempY:=StrPart(data,idx1+1,idx2-idx1-1);
+            tempZ:=StrPart(data,idx2+1,idx3-idx2-1);
+            tempTarget:=StrPart(data,idx3+1,StrLen(data)-idx3);
+            ! Convert strings to numeric values
+            IF StrToVal(tempX,x) AND
+                           StrToVal(tempY,y) AND
+                           StrToVal(tempZ,z) AND
+                           StrToVal(tempTarget,target) THEN
+            ENDIF
+        ENDIF
+
+    ENDPROC
+
+    PROC PickToIncenerationBin()
+        MoveJ Offs(WorkSpaceCenter,x,y,200),v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Offs(WorkSpaceCenter,x,y,0),v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Inceneration_2,v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Inceneration,v1000,z100,tool2\WObj:=wobj0;
+        MoveJ home,v1000,z100,tool2\WObj:=wobj0;
+    ENDPROC
+
+    PROC PickToRecyclingBin()
+        MoveJ Offs(WorkSpaceCenter,x,y,200),v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Offs(WorkSpaceCenter,x,y,0),v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Recyclables_2,v1000,z100,tool2\WObj:=wobj0;
+        MoveJ Recyclables,v1000,z100,tool2\WObj:=wobj0;
+        MoveJ home,v1000,z100,tool2\WObj:=wobj0;
+    ENDPROC
+
+ENDMODULE

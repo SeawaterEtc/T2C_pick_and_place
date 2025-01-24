@@ -1,0 +1,38 @@
+after user click on the button Command Robot Arm it will move on to the next page that shows two more buttons
+
+Sent coordinates to robot
+    Manual Pick and Place
+        for this the logical step of the system would be
+
+            after user click on the button "Manual Pick and Place", an image will be taken using capture_image_script.py.
+            
+            Do object detection on the image by using image_Input_save_obj_Pose.py.
+
+            The process of taking an image and doing object detection takes time, so the user will be showed a loading screen while the process is running. After that two script have been running successfully, load the page.
+
+            Load the file with the detection data for the user to see when they get into this page. The user can see list coordinates of the object, and the list types of the objects (load it from the Tmp_position.txt format is in the form of class_name,x,y,z). 
+            
+            User will be able to select the object to pick up, by clicking on the object check box. The user can also select the destination to place the object, by clicking on the destination buttons. By taking the functionality of the Socket_ABB_test.py file, the coordinates of the object and the target will be sent to the robot in the form of x,y,z,target.
+            
+            There are two buttons for the destination, one is for the destination 1, and the other is for the destination 2. After clicking the destination, the robot will recieve the coordinates information and move the object to the destination. The object that have been moved is deleted from the Tmp_position.txt file.
+
+            There is a back button for the user to go back to the previous page. If user click it all the objects in the Tmp_position.txt file will be deleted.
+
+    Auto Pick and Place
+        for this the logical step of the system would be
+            
+            after user click on the button "Auto Pick and Place", at the back end, an image will be taken. No need to show the image capturing process to the user. 
+            
+            Do object detection on the image, save the coordinates to the text file: C:\Users\USER\Learn_Coding\T2C_PickAndPlace\Data\RobotArmObjectCoordinate\Tmp_position.txt
+
+            The process of taking an image and doing object detection takes time, so the user will be showed a loading screen while the process is running. 
+
+            Load the file with the detection data for the user to see when they get into this page. The user can see the coordinates of the object, and the types of the objects (load it from the Tmp_position.txt file). The robot will pick up the object and place it to the destination 1. The object that have been moved is deleted from the Tmp_position.txt file.
+
+            There is a back button for the user to go back to the previous page. If user click it all the objects in the Tmp_position.txt file will be deleted.
+
+Robot follow the coordinates (Not yet implemented)
+    Manual Pick and Place
+        for this the logical step would be
+    Auto Pick and Place
+        for this the logical step would be

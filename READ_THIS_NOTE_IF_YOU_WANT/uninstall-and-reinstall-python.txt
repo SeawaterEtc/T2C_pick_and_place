@@ -1,0 +1,119 @@
+Should use only 3.11 
+
+Here’s how you can fully uninstall Python from your environment and reinstall it. The steps vary depending on your operating system:
+
+---
+
+### **Windows**
+
+#### 1. **Uninstall Python**
+- Open the **Control Panel**:
+  - Search for "Control Panel" in the Start menu.
+- Go to **Programs > Programs and Features**.
+- Find **Python** in the list of installed programs.
+- Right-click Python and select **Uninstall**.
+- Repeat this step if you have multiple Python versions installed.
+
+#### 2. **Remove Environment Variables**
+- Search for "Environment Variables" in the Start menu and open the **Edit the system environment variables** option.
+- Click on the **Environment Variables** button.
+- Under **System Variables** or **User Variables**, look for `PYTHONPATH` or `Path`.
+- Remove any paths related to Python, such as:
+  ```
+  C:\PythonXX\
+  C:\PythonXX\Scripts\
+  ```
+  Replace `XX` with the Python version number.
+
+#### 3. **Delete Remaining Python Files**
+- Manually delete leftover Python folders:
+  - Check `C:\Program Files\` and `C:\Program Files (x86)\` for Python-related folders.
+  - Check your user directory (e.g., `C:\Users\YourUsername\AppData\Local\Programs\Python`).
+  - Also, check for `.pip` or `.virtualenvs` folders in your user directory.
+
+#### 4. **Reinstall Python**
+- Go to the [Python downloads page](https://www.python.org/downloads/).
+- Download the installer for your desired Python version.
+- Run the installer and select **Add Python to PATH** during installation.
+- Verify installation:
+  ```cmd
+  python --version
+  ```
+
+---
+
+### **macOS**
+
+#### 1. **Uninstall Python**
+- Open the **Terminal**.
+- Run the following command to locate Python installations:
+  ```bash
+  ls /Library/Frameworks/Python.framework/Versions
+  ```
+- Remove each version with:
+  ```bash
+  sudo rm -rf /Library/Frameworks/Python.framework/Versions/X.Y
+  ```
+  Replace `X.Y` with the version number (e.g., `3.9`).
+
+- Remove symbolic links:
+  ```bash
+  sudo rm -rf /usr/local/bin/python3
+  sudo rm -rf /usr/local/bin/python
+  ```
+
+#### 2. **Delete Remaining Python Files**
+- Check for additional Python files:
+  ```bash
+  sudo find / -name "*python*" -exec rm -rf {} +
+  ```
+  Be cautious when running this command to avoid removing unintended files.
+
+#### 3. **Reinstall Python**
+- Download the installer from [python.org](https://www.python.org/downloads/).
+- Follow the installation instructions.
+- Verify installation:
+  ```bash
+  python3 --version
+  ```
+
+---
+
+### **Linux (e.g., Ubuntu)**
+
+#### 1. **Uninstall Python**
+- Open a terminal.
+- Remove Python versions:
+  ```bash
+  sudo apt-get remove --purge python3
+  sudo apt-get autoremove
+  sudo apt-get autoclean
+  ```
+
+#### 2. **Delete Remaining Files**
+- Check for leftover Python files and manually delete them:
+  ```bash
+  sudo rm -rf /usr/bin/python*
+  sudo rm -rf /usr/lib/python*
+  sudo rm -rf ~/.local/lib/python*
+  ```
+
+#### 3. **Reinstall Python**
+- Reinstall Python using the package manager:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install python3
+  ```
+- Verify installation:
+  ```bash
+  python3 --version
+  ```
+
+---
+
+### After Reinstalling
+- Reinstall packages or libraries as needed:
+  ```bash
+  pip install some_package
+  ```
+- If you use virtual environments, recreate them after reinstalling Python.
