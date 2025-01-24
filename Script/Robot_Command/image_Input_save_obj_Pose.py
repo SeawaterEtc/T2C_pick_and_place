@@ -44,7 +44,7 @@ def estimate_position(center, matrix_coefficients, distortion_coefficients):
     return real_x, real_y
 
 def main():
-    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_image/*.png'
+    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Sample/*.png'
     save_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_position.txt'
 
     # Open the file to save positions
@@ -60,7 +60,7 @@ def main():
             image = adjust_brightness(image, brightness_factor)
 
             # Perform object detection
-            results = model.predict(image, conf=0.7)  # Adjust thresholds
+            results = model.predict(image, conf=0.8)  # Adjust thresholds
 
             if results[0].masks is not None:
                 clss = results[0].boxes.cls.cpu().tolist()

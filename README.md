@@ -35,7 +35,9 @@ Then you are not inside the directory, you can run the code.
 
 ### Step 3: RUNME_GUI and Robot Studio Simulation
 
-You can extract the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
+You need a Robot Studio to run the simulation. You can download the Robot Studio from the ABB website, and use the pack and go file to extract the station.
+
+You can find the the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
 
 Before running the simulation or real station, please ensure that the port are set up correctly. The RUNME_GUI.py line 43 need to adjust accordingly: 
 

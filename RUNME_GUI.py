@@ -25,7 +25,7 @@ class RUNME_GUI:
         tk.Button(self.main_frame, text="Exit", command=self.window.quit, width=30).pack(pady=5)
 
     def demo_object_detection_diff_terminals(self):
-        os.system("start cmd /k python object_detection_position_estimation.py")
+        os.system("start cmd /k C:/Users/USER/Learn_Coding/T2C_PickAndPlace/object_detection_position_estimation.py")
 
     def command_robot_arm_page(self):
         self.clear_frame()
