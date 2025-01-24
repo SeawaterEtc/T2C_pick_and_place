@@ -5,7 +5,7 @@ This repository contain the code to command ABB_CRB_15000 robot arm to pick up o
 
 | Auto Pick and Place | Manual Pick and Place |
 |---------------------|-----------------------|
-| ![Auto Pick and Place](T2C_PickAndPlace/Data/gif/AutoPickAndPlace.gif) | ![Manual Pick](path/to/manual_pick.gif) |
+| ![Auto Pick and Place](Data/gif/AutoPickAndPlace.gif) | ![Manual Pick](path/to/manual_pick.gif) |
 
 
 ## Set up and run
@@ -13,6 +13,9 @@ By cloning this repository and having python 3.11 in your system. You can cd to 
 ```bash
 pip install -r requirements.txt
 ```
+
+##### Please notice that the code run using python script on top of script. If you are not on top of the directory, you will need to adjust the path accordingly.
+
 
 ### RUNME_GUI
 

@@ -41,13 +41,13 @@ class RUNME_GUI:
                 self.main_page()
 
     def connect_to_robot(self):
-        # # connect to simulated controller (Robot Studio simulation)
-        # HOST = '127.0.0.1'
-        # PORT = 55000  
+        # connect to simulated controller (Robot Studio simulation)
+        HOST = '127.0.0.1'
+        PORT = 55000  
         
-        # connect to real controller (real robot, change this address to the robot controller IP address)
-        HOST = '192.168.125.1'
-        PORT = 1025 
+        # # connect to real controller (real robot, change this address to the robot controller IP address)
+        # HOST = '192.168.125.1'
+        # PORT = 1025 
         
         
         try:
