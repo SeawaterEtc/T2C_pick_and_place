@@ -1,0 +1,123 @@
+MODULE Module1
+    VAR num x;
+    VAR num y;
+    VAR num z;
+    VAR robtarget Object_Target;
+    VAR pos p1;
+    VAR num target;
+    VAR string data;
+    VAR socketdev client_socket;
+    VAR socketdev temp_socket;
+    VAR robtarget targetRobTarget;
+    VAR string tempX;
+    VAR string tempY;
+    VAR string tempZ;
+    VAR string tempTarget;
+    VAR num idx0;
+    VAR num idx1;
+    VAR num idx2;
+    VAR num idx3;
+
+    PROC main()
+        MoveJ home1,v1000,z100,tool2\WObj:=Wobj_1;
+        
+        SocketConnect;
+
+        WHILE TRUE DO
+            ! socket sent in "1,1,1,1"
+            IF SocketGetStatus(client_socket)=SOCKET_CONNECTED THEN
+                SocketReceive client_socket\Str:=data,\Time:=WAIT_MAX;
+                SocketSend client_socket\Str:="Data received, processing...  ";
+                ConvertSocketStrToPose(data);
+                IF target=1 THEN
+                    PickToIncenerationBin;
+                    SocketSend client_socket\Str:="Process completed.  ";
+                ELSEIF target=2 THEN
+                    PickToRecyclingBin;
+                    SocketSend client_socket\Str:="Process completed.  ";
+
+                ENDIF
+            ENDIF
+            SocketSend client_socket\Str:="Job is done.  ";
+        ENDWHILE
+    ENDPROC
+
+    ! for real life robot station
+!    PROC SocketConnect()
+!        SocketCreate temp_socket;
+!        SocketBind temp_socket,"192.168.125.1",1025;
+!        SocketListen temp_socket;
+!        SocketAccept temp_socket,client_socket,\Time:=WAIT_MAX;
+!        TPWrite "Socket connection established.";
+!    ENDPROC
+
+    ! for simulation station
+    PROC SocketConnect()
+        ! Create, bind, listen, and accept the socket connection
+        SocketCreate temp_socket;
+        SocketBind temp_socket,"127.0.0.1",55000;
+        SocketListen temp_socket;
+        SocketAccept temp_socket,client_socket,\Time:=WAIT_MAX;
+        TPWrite "Socket connection established.";
+    ENDPROC    
+    PROC ConvertSocketStrToPose(string data)
+        ! Find indices of the commas
+        idx1:=StrFind(data,1,",");
+        idx2:=StrFind(data,idx1+1,",");
+        idx3:=StrFind(data,idx2+1,",");
+
+        ! Ensure all indices are valid
+        IF idx1>0 AND idx2>0 AND idx3>0 THEN
+            ! Extract substrings for x, y, z, and target
+            tempX:=StrPart(data,1,idx1-1);
+            tempY:=StrPart(data,idx1+1,idx2-idx1-1);
+            tempZ:=StrPart(data,idx2+1,idx3-idx2-1);
+            tempTarget:=StrPart(data,idx3+1,StrLen(data)-idx3);
+            ! Convert strings to numeric values
+            IF StrToVal(tempX,x) AND
+                           StrToVal(tempY,y) AND
+                           StrToVal(tempZ,z) AND
+                           StrToVal(tempTarget,target) THEN
+            ENDIF
+        ENDIF
+
+    ENDPROC
+
+    PROC PickToIncenerationBin()
+        MoveJ Offs(WorkSpaceCenter1,x,y,-200),v1000,z100,tool2\WObj:=Wobj_1;
+        MoveL Offs(WorkSpaceCenter1,x,y,0),v1000,z100,tool2\WObj:=Wobj_1;
+        WaitTime 2;
+!        SetDO Vacuum_DO, 1;
+        WaitTime 2;
+
+        MoveL Offs(WorkSpaceCenter1,x,y,-200),v1000,z100,tool2\WObj:=Wobj_1;
+        
+        MoveJ Offs(Inceneration1,0,0,-50),v1000,z100,tool2\WObj:=Wobj_1;
+        MoveL Offs(Inceneration1,0,0,0),v1000,z100,tool2\WObj:=Wobj_1;
+        WaitTime 2;
+!        SetDO Vacuum_DO, 0;
+        MoveL Offs(Inceneration1,0,0,-50),v1000,z100,tool2\WObj:=Wobj_1;
+        
+        MoveJ home1,v1000,z100,tool2\WObj:=Wobj_1;
+    ENDPROC
+
+    PROC PickToRecyclingBin()
+        MoveJ Offs(WorkSpaceCenter1,x,y,-200),v1000,z100,tool2\WObj:=Wobj_1;
+        MoveL Offs(WorkSpaceCenter1,x,y,0),v1000,z100,tool2\WObj:=Wobj_1;
+        WaitTime 2;
+!        SetDO Vacuum_DO, 1;  
+        WaitTime 2;
+
+        MoveL Offs(WorkSpaceCenter1,x,y,-200),v1000,z100,tool2\WObj:=Wobj_1;
+        
+        MoveJ Offs(Recyclables1,0,0,-50),v1000,z100,tool2\WObj:=Wobj_1;
+        MoveL Offs(Recyclables1,0,0,0),v1000,z100,tool2\WObj:=Wobj_1;
+        WaitTime 2;
+!        SetDO Vacuum_DO, 0;
+        MoveL Offs(Recyclables1,0,0,-50),v1000,z100,tool2\WObj:=Wobj_1;
+        
+!        MoveJ home1,v1000,z100,tool2\WObj:=Wobj_1;
+    ENDPROC
+
+
+ENDMODULE
