@@ -33,25 +33,27 @@ C:\Users\USER>Learn_Coding>
 ```
 Then you are not inside the directory, you can run the code.
 
-### Step 3: RUNME_GUI and Robot Studio Simulation
+### Step 3: run gui_main.py and Robot Studio Simulation
 
 You need a Robot Studio to run the simulation. You can download the Robot Studio from the ABB website, and use the pack and go file to extract the station.
 
 You can find the the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
 
-Before running the simulation or real station, please ensure that the port are set up correctly. The RUNME_GUI.py line 43 need to adjust accordingly: 
-
-```python
-    def connect_to_robot(self):
-        # connect to simulated controller (Robot Studio simulation)
-        HOST = '127.0.0.1'
-        PORT = 55000  
-        
-        # # connect to real controller (real robot, change this address to the robot controller IP address)
-        # HOST = '192.168.125.1'
-        # PORT = 1025 
-```
-
 Then you need to start the simulation in Robot Studio.
 
 And finally, you can run the RUNME_GUI.py to start the GUI. 
+
+#### How to test the code
+
+* ensure that you are on top of the directory
+
+=> run the gui_main.py 
+=> start robot studio simulation 
+=> click on command the robot arm 
+=> click on connect with simulation 
+=> click on stationary object mode 
+=> click on either manual pick or auto pick and place (it will detect the object in the input image, you need to close the detection widget to continue the process)
+
+| Example How to run the code |
+|---------------------|
+| ![Auto Pick and Place](Data/gif/how2run.gif) |
