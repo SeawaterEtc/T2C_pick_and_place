@@ -8,7 +8,8 @@ os.makedirs(save_dir)
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 num = 0
 
-n = 1 # time of second interval
+n = 0.25 # time of second interval
+
 start_time = time.time()
 while cap.isOpened():
     success, img = cap.read()

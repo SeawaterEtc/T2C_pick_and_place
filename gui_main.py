@@ -292,7 +292,6 @@ class RUNME_GUI:
         self.clear_frame()
         tk.Label(self.main_frame, text="Camera must be parallel, better checker board = better calibration", wraplength=400, justify="left").pack(pady=15)
         tk.Button(self.main_frame, text="Capture Checkerboard Image", command=self.capture_image).pack(pady=10)
-        tk.Button(self.main_frame, text="Calibrate Camera", command=self.camera_calibration).pack(pady=10)
         tk.Button(self.main_frame, text="Test Camera", command=self.test_camera).pack(pady=10)
         tk.Button(self.main_frame, text="Back", command=self.main_page).pack(pady=10)
 
@@ -300,11 +299,6 @@ class RUNME_GUI:
         """Clear all widgets from the main frame."""
         for widget in self.main_frame.winfo_children():
             widget.destroy()
-
-    def camera_calibration(self):
-        """Run the camera calibration script."""
-        script_path = os.path.join(SCRIPT_DIR, "camera_calibration.py")
-        self.run_script(script_path)
 
     def capture_image(self):
         """Run the capture chessboard image script."""

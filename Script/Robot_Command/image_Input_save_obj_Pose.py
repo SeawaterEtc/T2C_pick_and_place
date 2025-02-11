@@ -63,6 +63,7 @@ def main():
             results = model.predict(image, conf=0.8)  # Adjust thresholds
 
             if results[0].masks is not None:
+                print(f"Detected {len(results[0].masks.xy)} objects.")
                 clss = results[0].boxes.cls.cpu().tolist()
                 masks = results[0].masks.xy
                 for mask, cls in zip(masks, clss):
@@ -70,8 +71,8 @@ def main():
                     rect = cv2.minAreaRect(np.array(mask))
                     
                     # Calculate the inner rectangle (n% smaller)
-                    inner_width = rect[1][0] * 0.001
-                    inner_height = rect[1][1] * 0.001
+                    inner_width = rect[1][0] * 0.01
+                    inner_height = rect[1][1] * 0.01
                     inner_Rec = ((rect[0][0], rect[0][1]), (inner_width, inner_height), rect[2])
                     
                     box_center = (int(inner_Rec[0][0]), int(inner_Rec[0][1]))

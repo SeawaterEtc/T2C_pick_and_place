@@ -4,6 +4,7 @@ import shutil
 
 # Ensure the directory exists
 save_dir = 'C:/Users/USER/Learn_Coding/T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_image'
+
 if os.path.exists(save_dir):
     shutil.rmtree(save_dir)
 os.makedirs(save_dir)
@@ -25,5 +26,5 @@ while cap.isOpened():
     break
 # Release and destroy all windows before termination
 cap.release()
-cv2.waitKey(1000)
+cv2.waitKey()
 cv2.destroyAllWindows()
