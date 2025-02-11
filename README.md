@@ -25,7 +25,7 @@ if
 ```bash
 C:\Users\USER\Learn_Coding\T2C_PickAndPlace>
 ```
-Then you are inside the directory, RUNME.GUI code can't be run, because it won't be able to find other scripts. 
+Then you are inside the directory, code can't be run, because it won't be able to find other scripts. 
 
 if 
 ```bash
