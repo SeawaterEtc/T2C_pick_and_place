@@ -54,6 +54,6 @@ And finally, you can run the RUNME_GUI.py to start the GUI.
 => click on stationary object mode 
 => click on either manual pick or auto pick and place (it will detect the object in the input image, you need to close the detection widget to continue the process)
 
-| Example How to run the code |
+| Example How to run the code: Full video https://drive.google.com/file/d/1IcFKfqSzzJh8pYtEw5DMgpsANgZfK4kQ/view?usp=sharing  |
 |---------------------|
 | ![Auto Pick and Place](Data/gif/how2run.gif) |
