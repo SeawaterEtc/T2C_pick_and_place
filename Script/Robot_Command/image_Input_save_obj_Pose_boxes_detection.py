@@ -5,15 +5,15 @@ import glob
 from ultralytics import YOLO
 
 # Load the intrinsic camera matrix from cameraMatrix.pkl
-with open('T2C_PickAndPlace/Data/calReWithRvecTvec/cameraMatrix.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/cameraMatrix.pkl', 'rb') as f:
     intrinsic_camera = pickle.load(f)
 
 # Load the distortion coefficients from dist.pkl
-with open('T2C_PickAndPlace/Data/calReWithRvecTvec/dist.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/dist.pkl', 'rb') as f:
     distortion = pickle.load(f)
 
 # Load model
-model = YOLO("T2C_PickAndPlace/Data/AImodel/40-detect-best.pt")  # detection model
+model = YOLO("T2C_PickAndPlace/Data/AImodel/detect40.pt")  # detection model
 names = model.model.names
 
 # Function to adjust the brightness of the image
@@ -43,7 +43,7 @@ def estimate_position(center, matrix_coefficients, distortion_coefficients):
     return real_x, real_y
 
 def main():
-    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/real/*.png'
+    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/sample/s-image0.png'
     save_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_position.txt'
 
     # Open the file to save positions

@@ -4,10 +4,9 @@ import os
 import threading
 import time
 import logging
+import socket
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Tuple, Optional
-from robot_socket_handler import RobotSocketHandler
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -32,15 +31,16 @@ class RUNME_GUI:
         
         # Connection related variables
         self.connection_var = tk.StringVar(value="simulation")
-        self.robot_socket_handler = None
+        self.socket = None
+        self.connected = False
         self.connection_established = False
+        self.positions = []  # Internal list to store positions
         self.main_page()
 
     def main_page(self):
         """Main application page with all functionality access."""
         self.clear_frame()
         tk.Label(self.main_frame, text="Robotics Control System", font=("Arial", 16)).pack(pady=10)
-        
         
         # Main functionality buttons
         tk.Button(self.main_frame, text="Demo Object Detection", 
@@ -79,22 +79,18 @@ class RUNME_GUI:
         else:
             host, port = REAL_ROBOT_HOST, REAL_ROBOT_PORT
 
-        # Create new handler if needed
-        if not self.robot_socket_handler or \
-           self.robot_socket_handler.host != host or \
-           self.robot_socket_handler.port != port:
-            if self.robot_socket_handler:
-                self.robot_socket_handler.close()
-            self.robot_socket_handler = RobotSocketHandler(host, port)
-
         def connection_attempt():
             try:
-                connected = self.robot_socket_handler.connect()
-            except Exception as e:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                self.socket.connect((host, port))
+                logging.info(f"Connected to {host}:{port}")
+                self.connected = True
+                self.window.after(0, lambda: self.handle_connection_result(True))
+            except (socket.error, ConnectionRefusedError) as e:
                 logging.error(f"Connection error: {e}")
-                connected = False
-
-            self.window.after(0, lambda: self.handle_connection_result(connected))
+                self.connected = False
+                self.window.after(0, lambda: self.handle_connection_result(False))
 
         threading.Thread(target=connection_attempt, daemon=True).start()
 
@@ -103,17 +99,14 @@ class RUNME_GUI:
         self.connect_button.config(state=tk.NORMAL)
         if connected:
             self.connection_established = True
-
             self.command_robot_arm_page()
         else:
             messagebox.showerror("Connection Failed", 
                             "Failed to establish connection.\nPlease check:\n- Robot power\n- Network settings\n- Port availability")
 
-
     def close_and_return_main(self):
         """Close connection and return to main page"""
-        if self.robot_socket_handler:
-            self.robot_socket_handler.close()
+        self.close_socket()
         self.connection_established = False
         self.main_page()
 
@@ -137,6 +130,34 @@ class RUNME_GUI:
                 command=self.robot_follow_coordinate_page, width=30).pack(pady=5)
         tk.Button(self.main_frame, text="Back", 
                 command=self.close_and_return_main, width=30).pack(pady=5)
+
+    def send_data(self, data: str) -> bool:
+        """Send data while maintaining persistent connection."""
+        if not self.connected and not self.establish_connection():
+            return False
+
+        try:
+            self.socket.sendall(data.encode('utf-8'))
+            logging.info(f"Sent: {data}")
+            response = self.socket.recv(1024).decode('utf-8')
+            logging.info(f"Received: {response}")
+            return True
+        except (socket.error, ConnectionResetError) as e:
+            logging.error(f"Send error: {e}")
+            self.close_socket()
+            return False
+
+    def close_socket(self):
+        """Properly close the connection."""
+        if self.socket:
+            try:
+                self.socket.shutdown(socket.SHUT_RDWR)
+                self.socket.close()
+            except Exception as e:
+                logging.error(f"Close error: {e}")
+            self.socket = None
+            self.connected = False
+            logging.info("Connection closed")
 
     def demo_object_detection_diff_terminals(self):
         """Run the object detection script in a new terminal."""
@@ -171,6 +192,7 @@ class RUNME_GUI:
             detection_script = os.path.join(SCRIPT_DIR, "Robot_Command", "image_Input_save_obj_Pose.py")
 
             if self.run_script(capture_script) and self.run_script(detection_script):
+                self.positions = self.load_positions(TMP_POSITION_FILE)  # Load positions into internal list
                 self.load_manual_pick_and_place_page()
             else:
                 messagebox.showerror("Error", "Failed to run capture and detection scripts.")
@@ -184,16 +206,14 @@ class RUNME_GUI:
         self.clear_frame()
         tk.Label(self.main_frame, text="Manual Pick and Place", font=("Arial", 16)).pack(pady=10)
 
-        # Load the detection data
-        positions = self.load_positions(TMP_POSITION_FILE)
-        if not positions:
+        if not self.positions:
             messagebox.showerror("Error", "No positions found.")
             self.command_robot_arm_page()
             return
 
         # Display the detection data
         self.position_vars = []
-        for pos in positions:
+        for pos in self.positions:
             var = tk.BooleanVar()
             chk = tk.Checkbutton(self.main_frame, text=f"{pos[0]}: ({pos[1]}, {pos[2]}, {pos[3]})", variable=var)
             chk.pack(anchor='w')
@@ -211,30 +231,37 @@ class RUNME_GUI:
             messagebox.showwarning("Warning", "No object selected.")
             return
 
-        successful_positions = []
         for pos in selected_positions:
             x, y, z = pos[1], pos[2], pos[3]
             data = f"{x},{y},{z},{target}"
             
-            # Attempt to send with reconnect
-            if not self.robot_socket_handler.send_data(data):
-                # If send failed, try to reconnect once
-                if self.robot_socket_handler.connect():
-                    if self.robot_socket_handler.send_data(data):
-                        successful_positions.append(pos)
-                else:
-                    messagebox.showerror("Connection Lost", "Failed to reconnect to robot")
-                    break
-            else:
-                successful_positions.append(pos)
-
-        # Remove moved objects from Tmp_position.txt
-        self.remove_positions(TMP_POSITION_FILE, successful_positions)
+            # Send the position data
+            if not self.send_data(data):
+                messagebox.showerror("Error", "Failed to send data to robot.")
+                return
+                    # Wait for "D" (Done) from the robot
+            if not self.wait_for_response("D"):
+                messagebox.showerror("Error", "Robot did not confirm completion.")
+                return
+            
+        # Remove sent positions from the internal list
+        self.positions = [pos for pos in self.positions if pos not in selected_positions]
         self.load_manual_pick_and_place_page()
+        
+
+    def wait_for_response(self, expected_response: str) -> bool:
+        """Wait for a specific response from the robot."""
+        try:
+            response = self.socket.recv(1024).decode('utf-8')
+            logging.info(f"Waited and Received: {response}")
+            return response == expected_response
+        except (socket.error, ConnectionResetError) as e:
+            logging.error(f"Receive error: {e}")
+            return False
 
     def back_to_command_robot_arm_page(self):
         """Clear the position file and return to the command robot arm page."""
-        open(TMP_POSITION_FILE, 'w').close()
+        self.positions = []  # Clear internal positions list
         self.command_robot_arm_page()
 
     def auto_pick_and_place(self):
@@ -253,6 +280,7 @@ class RUNME_GUI:
             detection_script = os.path.join(SCRIPT_DIR, "Robot_Command", "image_Input_save_obj_Pose.py")
 
             if self.run_script(capture_script) and self.run_script(detection_script):
+                self.positions = self.load_positions(TMP_POSITION_FILE)  # Load positions into internal list
                 self.load_auto_pick_and_place_page()
             else:
                 messagebox.showerror("Error", "Failed to run capture and detection scripts.")
@@ -263,13 +291,12 @@ class RUNME_GUI:
 
     def load_auto_pick_and_place_page(self):
         """Automatically send objects to their respective destinations."""
-        positions = self.load_positions(TMP_POSITION_FILE)
-        if not positions:
+        if not self.positions:
             messagebox.showerror("Error", "No positions found.")
             self.command_robot_arm_page()
             return
 
-        for pos in positions:
+        for pos in self.positions:
             class_name = pos[0]
             x, y, z = pos[1], pos[2], pos[3]
             if class_name == "Plastic-bottle":
@@ -282,11 +309,23 @@ class RUNME_GUI:
                 continue  # Skip unknown classes
 
             data = f"{x},{y},{z},{target}"
-            self.robot_socket_handler.send_data(data)
-            time.sleep(15)
+            
 
+            # Send the position data
+            if not self.send_data(data):
+                messagebox.showerror("Error", "Failed to send data to robot.")
+                return
+                    # Wait for "D" (Done) from the robot
+            if not self.wait_for_response("D"):
+                messagebox.showerror("Error", "Robot did not confirm completion.")
+                return
+            
+        # Clear internal positions list after sending all positions
+        self.positions = []
         self.command_robot_arm_page()
+        
 
+        
     def calibration_page(self):
         """Display the camera calibration page."""
         self.clear_frame()
@@ -330,24 +369,10 @@ class RUNME_GUI:
             logging.error(f"{file_path} not found.")
             return []
 
-    @staticmethod
-    def remove_positions(file_path: str, positions: List[List[str]]):
-        """Remove positions from a file."""
-        try:
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
-
-            with open(file_path, 'w') as file:
-                for line in lines:
-                    if not any(pos[1] == line.strip().split(',')[1] for pos in positions):
-                        file.write(line)
-        except Exception as e:
-            logging.error(f"Error removing positions: {e}")
-
     def on_window_close(self):
         """Handle window close event."""
-        if self.robot_socket_handler:
-            self.robot_socket_handler.close()
+        if self:
+            self.close_socket()
         self.window.destroy()
 
 

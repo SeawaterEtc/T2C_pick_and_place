@@ -5,15 +5,15 @@ import glob
 from ultralytics import YOLO
 
 # Load the intrinsic camera matrix from cameraMatrix.pkl
-with open('T2C_PickAndPlace/Data/calReWithRvecTvec/cameraMatrix.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/cameraMatrix.pkl', 'rb') as f:
     intrinsic_camera = pickle.load(f)
 
 # Load the distortion coefficients from dist.pkl
-with open('T2C_PickAndPlace/Data/calReWithRvecTvec/dist.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/dist.pkl', 'rb') as f:
     distortion = pickle.load(f)
 
 # Load model
-model = YOLO("T2C_PickAndPlace/Data/AImodel/1-15-50-50best.pt")  # segmentation model
+model = YOLO("T2C_PickAndPlace/Data/AImodel/seg146.pt")  # segmentation model
 names = model.model.names
 
 # Function to adjust the brightness of the image
