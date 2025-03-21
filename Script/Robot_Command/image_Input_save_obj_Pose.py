@@ -13,8 +13,10 @@ with open('T2C_PickAndPlace/Data/calidataRational206s/dist.pkl', 'rb') as f:
     distortion = pickle.load(f)
 
 # Load model
-model = YOLO("T2C_PickAndPlace/Data/AImodel/seg146.pt")  # segmentation model
+model = YOLO("T2C_PickAndPlace/Data/AImodel/best.pt")  # segmentation model
 names = model.model.names
+
+print("Model loaded successfully.")
 
 # Function to adjust the brightness of the image
 def adjust_brightness(image, brightness=1.0):
@@ -44,7 +46,7 @@ def estimate_position(center, matrix_coefficients, distortion_coefficients):
     return real_x, real_y
 
 def main():
-    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/sample/*.png'
+    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/tmp/*.png'
     save_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_position.txt'
 
     # Open the file to save positions
@@ -61,6 +63,8 @@ def main():
 
             # Perform object detection
             results = model.predict(image, conf=0.8)  # Adjust thresholds
+
+            print(f"Processing image: {img_path}")
 
             if results[0].masks is not None:
                 print(f"Detected {len(results[0].masks.xy)} objects.")
@@ -91,8 +95,9 @@ def main():
 
             # Display the image with annotations
             cv2.imshow("Detected Objects", image)
-            cv2.waitKey()
+            cv2.waitKey(10)
             cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
+    print("Finished processing all images.")

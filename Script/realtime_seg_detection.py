@@ -5,16 +5,17 @@ import numpy as np
 import pickle
 
 # Load model
-model = YOLO("T2C_PickAndPlace/Data/AImodel/seg116.pt")  # segmentation model
+model = YOLO("T2C_PickAndPlace/Data/AImodel/best.pt")  # segmentation model
 names = model.model.names
 
 # Load the intrinsic camera matrix from cameraMatrix.pkl
-with open('T2C_PickAndPlace/Data/Calibration_result/cameraMatrix.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/cameraMatrix.pkl', 'rb') as f:
     intrinsic_camera = pickle.load(f)
 
 # Load the distortion coefficients from dist.pkl
-with open('T2C_PickAndPlace/Data/Calibration_result/dist.pkl', 'rb') as f:
+with open('T2C_PickAndPlace/Data/calidataRational206s/dist.pkl', 'rb') as f:
     distortion = pickle.load(f)
+
 
 def draw_oriented_bounding_box(image, box, cls, color=(0, 255, 0), thickness=2):
     x, y, w, h, angle = box

@@ -1,0 +1,14 @@
+The way to adjust the center target of RobotTarget in Robot Studio. 
+
++ open flex pendant
++ go to the program tab
++ go to program data tab
++ use the flex pendant to jog the robot to the desired position
++ update the target in the robot studio
+
+The way to find the coordinates of work object 
+
++ open flex pendant
++ use jog
++ select the work object
++ move and see the changes in the coordinates to determine the coordinates of the work object
