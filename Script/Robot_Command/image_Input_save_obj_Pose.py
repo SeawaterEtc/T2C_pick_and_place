@@ -46,7 +46,11 @@ def estimate_position(center, matrix_coefficients, distortion_coefficients):
     return real_x, real_y
 
 def main():
+<<<<<<< HEAD
     image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/tmp/*.png'
+=======
+    image_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/real/*.png'
+>>>>>>> master
     save_path = 'T2C_PickAndPlace/Data/RobotArmObjectCoordinate/Tmp_position.txt'
 
     # Open the file to save positions
