@@ -1,60 +1,132 @@
-## The branch for testing
-# T2C_PickAndPlace_Robot_Arm_ABB_CRB_15000
+# T2C Pick and Place (ABB CRB 15000 Robot Arm)
 
-This repository contain the code to command ABB_CRB_15000 robot arm to pick up objects by using AI model. The current AI model can only detect PET-plastic-bottles, Aluminuim-cans and Snack-packets (It will be able to detect more objects in the future). 
-## Showcase
+This repository contains the codebase to command the **ABB CRB 15000 robot arm** to detect and pick up objects using a custom YOLOv8 AI model. The system currently supports detection and sorting for **PET plastic bottles**, **aluminum cans**, and **snack packets**.
+
+---
+
+## 📺 Showcase
 
 | Auto Pick and Place | Manual Pick and Place |
-|---------------------|-----------------------|
-| ![Auto Pick and Place](Data/gif/AutoPickAndPlace.gif) | ![Manual Pick](path/to/manual_pick.gif) |
+|:---:|:---:|
+| ![Auto Pick and Place](Data/gif/AutoPickAndPlace.gif) | *To be implemented* <br> `(path/to/manual_pick.gif)` |
 
+---
 
-## Set up and run
+## ⚠️ Critical Path & Directory Requirements
 
-### Step 1: Prerequisites
+The codebase contains hardcoded paths referencing the folder name `T2C_PickAndPlace`. To avoid path resolution errors (especially on case-sensitive operating systems like Linux and macOS):
 
-By cloning/downloading this repository and having python 3.11 in your system. You can cd to the directory, for example,  (C:\Users\USER\Learn_Coding\T2C_Pick_And_Place> ) install all the requrments using: 
-```bash
-pip install -r requirements.txt
-```
+1. **Rename the Directory**: Ensure the module folder is named exactly **`T2C_PickAndPlace`** (matching the case). If it is cloned or extracted as `T2C_pick_and_place`, rename it before proceeding.
+2. **Execute from Parent Directory**: You must run the python commands from the **parent directory** of `T2C_PickAndPlace`.
 
-### Step 2: Please notice that the code run using python script on top of script. If you are not on top of the directory, you will need to adjust the path accordingly.
+---
 
-Here is a few example of where you are. 
+## ⚙️ Setup Instructions
 
-if 
-```bash
-C:\Users\USER\Learn_Coding\T2C_PickAndPlace>
-```
-Then you are inside the directory, code can't be run, because it won't be able to find other scripts. 
+### Prerequisites
+* **Python**: Python 3.11 is recommended.
+* **ABB RobotStudio**: Required to run the robot simulation (Windows only).
 
-if 
-```bash
-C:\Users\USER>Learn_Coding>
-```
-Then you are not inside the directory, you can run the code.
+Choose your operating system below for tailored instructions:
 
-### Step 3: run gui_main.py and Robot Studio Simulation
+### 🪟 Windows Setup
+1. **Open Terminal**: Open Command Prompt (CMD) or PowerShell and navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+   ```cmd
+   cd C:\path\to\parent\directory
+   ```
+2. **Create a Virtual Environment** (Optional but recommended):
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+3. **Install Requirements**:
+   ```cmd
+   pip install -r T2C_PickAndPlace/requirements.txt
+   ```
 
-You need a Robot Studio to run the simulation. You can download the Robot Studio from the ABB website, and use the pack and go file to extract the station.
+### 🐧 Linux Setup
+1. **Install Tkinter**: On Linux distributions (e.g., Ubuntu/Debian), Tkinter is not bundled with Python by default and must be installed manually:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install python3-tk
+   ```
+2. **Open Terminal**: Navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+   ```bash
+   cd /path/to/parent/directory
+   ```
+3. **Create a Virtual Environment** (Optional but recommended):
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+4. **Install Requirements**:
+   ```bash
+   pip install -r T2C_PickAndPlace/requirements.txt
+   ```
 
-You can find the the Pack and Go File of Robot Studio from the data folder that contain .rspag file. It is a robot studio station for testing the code.
+### 🍎 macOS Setup
+1. **Install Tkinter**: If Tkinter is missing from your Python installation, install it via Homebrew:
+   ```bash
+   brew install python-tk
+   ```
+2. **Open Terminal**: Navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+   ```bash
+   cd /path/to/parent/directory
+   ```
+3. **Create a Virtual Environment** (Optional but recommended):
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+4. **Install Requirements**:
+   ```bash
+   pip install -r T2C_PickAndPlace/requirements.txt
+   ```
 
-Then you need to start the simulation in Robot Studio.
+---
 
-And finally, you can run the RUNME_GUI.py to start the GUI. 
+## 🤖 ABB RobotStudio Simulation Setup (Windows)
 
-#### How to test the code
+> [!NOTE]
+> ABB RobotStudio is a Windows-only application. If you are developing on Linux or macOS, you must run RobotStudio on a separate Windows machine or Virtual Machine on the same local network.
 
-* ensure that you are on top of the directory
+1. Download and install **ABB RobotStudio** on your Windows environment.
+2. Locate the Pack and Go station file: [Pick_and_Place_Draft.rspag](file:///home/sswaterlab/todo/trash2cash_factory/T2C_pick_and_place/Data/Pick_and_Place_Draft.rspag).
+3. Open RobotStudio, select **Pack & Go**, and extract the station.
+4. Start the simulation. This starts the virtual controller, which listens for socket connections on port `55000`.
+5. **Cross-OS Network Configuration**: If your Python GUI is running on Linux/macOS and RobotStudio is running on Windows:
+   * Identify the local IP address of your Windows machine.
+   * Open [gui_main.py](file:///home/sswaterlab/todo/trash2cash_factory/T2C_pick_and_place/gui_main.py) and change `SIMULATION_HOST = '127.0.0.1'` to the Windows machine's IP address.
 
-=> run the gui_main.py 
-=> start robot studio simulation 
-=> click on command the robot arm 
-=> click on connect with simulation 
-=> click on stationary object mode 
-=> click on either manual pick or auto pick and place (it will detect the object in the input image, you need to close the detection widget to continue the process)
+---
 
-| Example How to run the code: Full video https://drive.google.com/file/d/1IcFKfqSzzJh8pYtEw5DMgpsANgZfK4kQ/view?usp=sharing  |
-|---------------------|
-| ![Auto Pick and Place](Data/gif/how2run.gif) |
+## 🚀 How to Run and Test
+
+1. **Activate Environment**: Ensure you are in the parent directory and your virtual environment is active.
+2. **Launch the GUI**:
+   * **Windows**:
+     ```cmd
+     python T2C_PickAndPlace/gui_main.py
+     ```
+   * **Linux / macOS**:
+     ```bash
+     python3 T2C_PickAndPlace/gui_main.py
+     ```
+3. **Execution Steps inside the GUI**:
+   * Click **Command Robot Arm**.
+   * Click **Connect** (Simulation setup).
+   * Click **Stationary Objects**.
+   * Select either **Manual Pick and Place** or **Auto Pick and Place**.
+   * The AI will run object detection on the input image. *Note: Close the detection window to proceed.*
+   * Select/verify objects and assign target actions (e.g. incineration or recycling).
+
+---
+
+## 🎥 Video Instruction & Run Tutorial
+
+For a detailed walkthrough, watch the [Full Setup and Run Video on Google Drive](https://drive.google.com/file/d/1IcFKfqSzzJh8pYtEw5DMgpsANgZfK4kQ/view?usp=sharing).
+
+![How to run the code](Data/gif/how2run.gif)
+
+---
+
