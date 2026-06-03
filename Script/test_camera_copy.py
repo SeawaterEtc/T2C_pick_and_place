@@ -96,22 +96,26 @@ def main():
         # Draw cross lines at the center of the image
         draw_cross_lines(img, center_x, center_y)
 
+        cv2.imshow('img', img)
         k = cv2.waitKey(5)
         
-        
-        if k == 27:  # Press 'Esc' key or 'q' key to exit
+        if k == 27 or k == ord('q') or k == ord('Q'):  # Press 'Esc' or 'q' key to exit
             break
 
+        # Break the loop if the window is closed by clicking [X]
+        try:
+            if cv2.getWindowProperty('img', cv2.WND_PROP_VISIBLE) < 1:
+                break
+        except Exception:
+            break
 
-        elif k == ord('s'):  # Press 's' key to save the image
+        if k == ord('s'):  # Press 's' key to save the image
             save_path = os.path.join(save_dir, 's-image' + str(num) + '.png')
             if cv2.imwrite(save_path, img):
                 print(f"Image saved at {save_path}")
                 num += 1
             else:
                 print(f"Failed to save image at {save_path}")
-
-        cv2.imshow('img', img)
 
     # Release and destroy all windows before termination
     cap.release()

@@ -42,10 +42,17 @@ while cap.isOpened():
         else: 
             print(f"Failed to save image at {save_path}")    
         start_time = current_time # to reset the timer
-    k = cv2.waitKey(5)
-    if k == 27:  # Press 'Esc' key to exit
-        break
     cv2.imshow('img', img)
+    k = cv2.waitKey(5)
+    if k == 27 or k == ord('q') or k == ord('Q'):  # Press 'Esc' or 'q' key to exit
+        break
+    
+    # Break the loop if the window is closed by clicking [X]
+    try:
+        if cv2.getWindowProperty('img', cv2.WND_PROP_VISIBLE) < 1:
+            break
+    except Exception:
+        break
 
 # Release and destroy all windows before termination
 cap.release()

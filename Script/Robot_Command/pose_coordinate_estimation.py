@@ -156,7 +156,14 @@ def main():
             key = cv2.waitKey(1) & 0xFF
             if key == ord(' '):  # Space key to process frame
                 print("Frame captured and processing...")
-            if key == ord('q'):  # Quit loop
+            if key == 27 or key == ord('q') or key == ord('Q'):  # Quit loop
+                break
+
+            # Break the loop if the window is closed by clicking [X]
+            try:
+                if cv2.getWindowProperty('Estimated Pose with Cross Lines', cv2.WND_PROP_VISIBLE) < 1:
+                    break
+            except Exception:
                 break
 
     finally:

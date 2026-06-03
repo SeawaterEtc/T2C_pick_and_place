@@ -57,7 +57,14 @@ def combined_aruco_socket():
                     print(f"Sent: {data}")
                     print("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n")
 
-            if key == ord('q'):  # Exit loop
+            if key == 27 or key == ord('q') or key == ord('Q'):  # Exit loop
+                break
+
+            # Break the loop if the window is closed by clicking [X]
+            try:
+                if cv2.getWindowProperty('Estimated Pose with Cross Lines', cv2.WND_PROP_VISIBLE) < 1:
+                    break
+            except Exception:
                 break
 
     finally:

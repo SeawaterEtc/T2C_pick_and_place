@@ -43,7 +43,16 @@ while True:
 
     out.write(im0)
     cv2.imshow("instance-segmentation", im0)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    
+    k = cv2.waitKey(1) & 0xFF
+    if k in [27, ord('q'), ord('Q')]:  # ESC or q
+        break
+
+    # Break the loop if the window is closed by clicking [X]
+    try:
+        if cv2.getWindowProperty("instance-segmentation", cv2.WND_PROP_VISIBLE) < 1:
+            break
+    except Exception:
         break
 
 cap.release()

@@ -92,7 +92,15 @@ def main():
         cv2.imshow("Object Detection", frame)
 
         # Add frame delay to control frame rate
-        if cv2.waitKey(frame_delay) & 0xFF == ord("q"):
+        k = cv2.waitKey(frame_delay) & 0xFF
+        if k in [27, ord('q'), ord('Q')]:  # Esc or 'q' key
+            break
+
+        # Break the loop if the window is closed by clicking [X]
+        try:
+            if cv2.getWindowProperty("Object Detection", cv2.WND_PROP_VISIBLE) < 1:
+                break
+        except Exception:
             break
 
     cap.release()
