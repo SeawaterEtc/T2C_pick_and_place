@@ -1,6 +1,7 @@
 import cv2
 import os
 import shutil
+import platform
 
 # go to https://markhedleyjones.com/projects/calibration-checkerboard-collection for chessboard images 
 # Dynamically locate project root
@@ -24,7 +25,10 @@ os.makedirs(save_dir)
 def list_all_cam(max=10):
     all_camera = []
     for i in range(max):
-        cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+        if platform.system() == "Windows":
+            cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+        else:
+            cap = cv2.VideoCapture(i)
         if cap.isOpened():
             all_camera.append(i)
             cap.release()
@@ -63,7 +67,19 @@ def main():
     
     print("Available cameras: ", camera)
 
-    cap = cv2.VideoCapture(camera[0], cv2.CAP_DSHOW)
+    # Prioritize CAMERA_INDEX from environment, fallback to first found camera, then to 0
+    env_camera = os.getenv("CAMERA_INDEX")
+    if env_camera is not None:
+        camera_idx = int(env_camera)
+    elif camera:
+        camera_idx = camera[0]
+    else:
+        camera_idx = 0
+
+    if platform.system() == "Windows":
+        cap = cv2.VideoCapture(camera_idx, cv2.CAP_DSHOW)
+    else:
+        cap = cv2.VideoCapture(camera_idx)
     num = 0
 
     while cap.isOpened():

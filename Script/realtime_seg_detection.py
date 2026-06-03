@@ -52,8 +52,12 @@ def estimate_position(center, matrix_coefficients, distortion_coefficients):
     real_x = center_undistorted[0][0][0] * 1000
     real_y = center_undistorted[0][0][1] * 1000
     return real_x, real_y
-
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+import platform
+camera_index = int(os.getenv("CAMERA_INDEX", "0"))
+if platform.system() == "Windows":
+    cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+else:
+    cap = cv2.VideoCapture(camera_index)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))

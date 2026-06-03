@@ -19,8 +19,12 @@ save_dir = os.path.join(ROOT_DIR, 'Data', 'RobotArmObjectCoordinate', 'tmp')
 if os.path.exists(save_dir):
     shutil.rmtree(save_dir)
 os.makedirs(save_dir)
-
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+import platform
+camera_index = int(os.getenv("CAMERA_INDEX", "0"))
+if platform.system() == "Windows":
+    cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+else:
+    cap = cv2.VideoCapture(camera_index)
 num = 0
 
 while cap.isOpened():

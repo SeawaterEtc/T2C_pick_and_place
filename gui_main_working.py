@@ -9,6 +9,7 @@ import threading
 import time
 import logging
 import socket
+import cv2
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Tuple, Optional
 
@@ -46,6 +47,8 @@ class RUNME_GUI:
         
         # Connection related variables
         self.connection_var = tk.StringVar(value="simulation")
+        self.camera_var = tk.StringVar(value=os.getenv("CAMERA_INDEX", "0"))
+        os.environ["CAMERA_INDEX"] = self.camera_var.get()
         self.socket = None
         self.connected = False
         self.connection_established = False
@@ -57,6 +60,35 @@ class RUNME_GUI:
         self.clear_frame()
         tk.Label(self.main_frame, text="Robotics Control System", font=("Arial", 16)).pack(pady=10)
         
+        # Camera Selection Dropdown
+        camera_frame = tk.Frame(self.main_frame)
+        camera_frame.pack(pady=10)
+        tk.Label(camera_frame, text="Select Camera:").pack(side=tk.LEFT, padx=5)
+
+        # Detect available cameras dynamically
+        available_cameras = []
+        for i in range(4):
+            try:
+                if platform.system() == "Windows":
+                    cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+                else:
+                    cap = cv2.VideoCapture(i)
+                if cap.isOpened():
+                    available_cameras.append(str(i))
+                    cap.release()
+            except Exception:
+                pass
+
+        if not available_cameras:
+            available_cameras = ["0"]
+
+        if self.camera_var.get() not in available_cameras:
+            self.camera_var.set(available_cameras[0])
+            os.environ["CAMERA_INDEX"] = available_cameras[0]
+
+        camera_dropdown = tk.OptionMenu(camera_frame, self.camera_var, self.camera_var.get(), *available_cameras, command=self.on_camera_select)
+        camera_dropdown.pack(side=tk.LEFT, padx=5)
+
         # Main functionality buttons
         tk.Button(self.main_frame, text="Demo Object Detection", 
                 command=self.demo_object_detection_diff_terminals, width=30).pack(pady=5)
@@ -66,6 +98,11 @@ class RUNME_GUI:
                 command=self.calibration_page, width=30).pack(pady=5)
         tk.Button(self.main_frame, text="Exit", 
                 command=self.window.quit, width=30).pack(pady=5)
+
+    def on_camera_select(self, value):
+        """Update CAMERA_INDEX environment variable when dropdown changes."""
+        os.environ["CAMERA_INDEX"] = str(value)
+        logging.info(f"Camera index updated to: {value}")
 
     def connection_setup_page(self):
         """Page for setting up robot connection"""
