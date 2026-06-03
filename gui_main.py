@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
 import os
+import sys
+import shutil
+import platform
+import subprocess
 import threading
 import time
 import logging
@@ -13,8 +17,19 @@ from robot_socket_handler import RobotSocketHandler
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Constants
-SCRIPT_DIR = os.getenv("SCRIPT_DIR", "T2C_PickAndPlace/Script")
-DATA_DIR = os.getenv("DATA_DIR", "T2C_PickAndPlace/Data/RobotArmObjectCoordinate")
+def find_root_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = current_dir
+    while root_dir and not os.path.exists(os.path.join(root_dir, 'gui_main.py')):
+        parent = os.path.dirname(root_dir)
+        if parent == root_dir:
+            break
+        root_dir = parent
+    return root_dir
+
+ROOT_DIR = find_root_dir()
+SCRIPT_DIR = os.path.join(ROOT_DIR, "Script")
+DATA_DIR = os.path.join(ROOT_DIR, "Data", "RobotArmObjectCoordinate")
 TMP_POSITION_FILE = os.path.join(DATA_DIR, "Tmp_position.txt")
 REAL_ROBOT_HOST = '192.168.125.1'
 REAL_ROBOT_PORT = 1025
@@ -139,9 +154,38 @@ class RUNME_GUI:
                 command=self.close_and_return_main, width=30).pack(pady=5)
 
     def demo_object_detection_diff_terminals(self):
-        """Run the object detection script in a new terminal."""
+        """Run the object detection script in a new terminal window depending on the OS."""
         script_path = os.path.join(SCRIPT_DIR, "realtime_seg_detection.py")
-        os.system(f"start cmd /k python {script_path}")
+        python_exe = sys.executable
+        os_name = platform.system()
+        
+        try:
+            if os_name == "Windows":
+                subprocess.Popen(["cmd.exe", "/c", "start", "cmd.exe", "/k", python_exe, script_path])
+            elif os_name == "Darwin":  # macOS
+                cmd = f'tell application "Terminal" to do script "{python_exe} {script_path}"'
+                subprocess.Popen(["osascript", "-e", cmd])
+            else:  # Linux and other Unix-like systems
+                terminals = ["gnome-terminal", "konsole", "xfce4-terminal", "xterm", "lxterminal"]
+                terminal = None
+                for term in terminals:
+                    if shutil.which(term):
+                        terminal = term
+                        break
+                
+                if terminal == "gnome-terminal":
+                    subprocess.Popen(["gnome-terminal", "--", python_exe, script_path])
+                elif terminal in ["konsole", "xfce4-terminal", "lxterminal"]:
+                    subprocess.Popen([terminal, "-e", f"{python_exe} {script_path}"])
+                elif terminal == "xterm":
+                    subprocess.Popen(["xterm", "-e", python_exe, script_path])
+                else:
+                    logging.info("No terminal emulator found. Running as background process.")
+                    subprocess.Popen([python_exe, script_path])
+        except Exception as e:
+            logging.error(f"Failed to start script in new terminal: {e}")
+            # Fallback: run directly as background subprocess
+            subprocess.Popen([python_exe, script_path])
 
     def send_coordinate_to_robot_page(self):
         """Display the page for sending coordinates to the robot."""
@@ -314,8 +358,9 @@ class RUNME_GUI:
     def run_script(script_path: str) -> bool:
         """Run a Python script using subprocess."""
         try:
-            result = os.system(f"python {script_path}")
-            return result == 0
+            python_exe = sys.executable
+            result = subprocess.run([python_exe, script_path])
+            return result.returncode == 0
         except Exception as e:
             logging.error(f"Error running script {script_path}: {e}")
             return False

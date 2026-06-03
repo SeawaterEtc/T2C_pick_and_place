@@ -3,8 +3,19 @@ import os
 import shutil
 
 # go to https://markhedleyjones.com/projects/calibration-checkerboard-collection for chessboard images 
-# Ensure the directory exists
-save_dir = 'T2C_PickAndPlace/Data/Image4Cal/F-sample_capture'
+# Dynamically locate project root
+def find_root_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = current_dir
+    while root_dir and not os.path.exists(os.path.join(root_dir, 'gui_main.py')):
+        parent = os.path.dirname(root_dir)
+        if parent == root_dir:
+            break
+        root_dir = parent
+    return root_dir
+
+ROOT_DIR = find_root_dir()
+save_dir = os.path.join(ROOT_DIR, 'Data', 'Image4Cal', 'F-sample_capture')
 if os.path.exists(save_dir):
     shutil.rmtree(save_dir)
 os.makedirs(save_dir)

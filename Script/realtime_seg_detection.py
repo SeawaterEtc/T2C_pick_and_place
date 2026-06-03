@@ -1,19 +1,36 @@
 import cv2
+import os
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator, colors
 import numpy as np
 import pickle
 
+# Dynamically locate project root
+def find_root_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = current_dir
+    while root_dir and not os.path.exists(os.path.join(root_dir, 'gui_main.py')):
+        parent = os.path.dirname(root_dir)
+        if parent == root_dir:
+            break
+        root_dir = parent
+    return root_dir
+
+ROOT_DIR = find_root_dir()
+
 # Load model
-model = YOLO("T2C_PickAndPlace/Data/AImodel/best.pt")  # segmentation model
+model_path = os.path.join(ROOT_DIR, 'Data', 'AImodel', 'best.pt')
+model = YOLO(model_path)  # segmentation model
 names = model.model.names
 
 # Load the intrinsic camera matrix from cameraMatrix.pkl
-with open('T2C_PickAndPlace/Data/calidataRational206s/cameraMatrix.pkl', 'rb') as f:
+camera_matrix_path = os.path.join(ROOT_DIR, 'Data', 'calidataRational206s', 'cameraMatrix.pkl')
+with open(camera_matrix_path, 'rb') as f:
     intrinsic_camera = pickle.load(f)
 
 # Load the distortion coefficients from dist.pkl
-with open('T2C_PickAndPlace/Data/calidataRational206s/dist.pkl', 'rb') as f:
+dist_path = os.path.join(ROOT_DIR, 'Data', 'calidataRational206s', 'dist.pkl')
+with open(dist_path, 'rb') as f:
     distortion = pickle.load(f)
 
 

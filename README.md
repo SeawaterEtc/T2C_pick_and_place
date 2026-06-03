@@ -12,15 +12,6 @@ This repository contains the codebase to command the **ABB CRB 15000 robot arm**
 
 ---
 
-## ⚠️ Critical Path & Directory Requirements
-
-The codebase contains hardcoded paths referencing the folder name `T2C_PickAndPlace`. To avoid path resolution errors (especially on case-sensitive operating systems like Linux and macOS):
-
-1. **Rename the Directory**: Ensure the module folder is named exactly **`T2C_PickAndPlace`** (matching the case). If it is cloned or extracted as `T2C_pick_and_place`, rename it before proceeding.
-2. **Execute from Parent Directory**: You must run the python commands from the **parent directory** of `T2C_PickAndPlace`.
-
----
-
 ## ⚙️ Setup Instructions
 
 ### Prerequisites
@@ -30,9 +21,9 @@ The codebase contains hardcoded paths referencing the folder name `T2C_PickAndPl
 Choose your operating system below for tailored instructions:
 
 ### 🪟 Windows Setup
-1. **Open Terminal**: Open Command Prompt (CMD) or PowerShell and navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+1. **Open Terminal**: Navigate to the directory containing the project:
    ```cmd
-   cd C:\path\to\parent\directory
+   cd C:\path\to\T2C_pick_and_place
    ```
 2. **Create a Virtual Environment** (Optional but recommended):
    ```cmd
@@ -41,7 +32,7 @@ Choose your operating system below for tailored instructions:
    ```
 3. **Install Requirements**:
    ```cmd
-   pip install -r T2C_PickAndPlace/requirements.txt
+   pip install -r requirements.txt
    ```
 
 ### 🐧 Linux Setup
@@ -50,9 +41,9 @@ Choose your operating system below for tailored instructions:
    sudo apt-get update
    sudo apt-get install python3-tk
    ```
-2. **Open Terminal**: Navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+2. **Open Terminal**: Navigate to the directory containing the project:
    ```bash
-   cd /path/to/parent/directory
+   cd /path/to/T2C_pick_and_place
    ```
 3. **Create a Virtual Environment** (Optional but recommended):
    ```bash
@@ -61,7 +52,7 @@ Choose your operating system below for tailored instructions:
    ```
 4. **Install Requirements**:
    ```bash
-   pip install -r T2C_PickAndPlace/requirements.txt
+   pip install -r requirements.txt
    ```
 
 ### 🍎 macOS Setup
@@ -69,9 +60,9 @@ Choose your operating system below for tailored instructions:
    ```bash
    brew install python-tk
    ```
-2. **Open Terminal**: Navigate to the parent directory containing the `T2C_PickAndPlace` folder:
+2. **Open Terminal**: Navigate to the directory containing the project:
    ```bash
-   cd /path/to/parent/directory
+   cd /path/to/T2C_pick_and_place
    ```
 3. **Create a Virtual Environment** (Optional but recommended):
    ```bash
@@ -80,7 +71,7 @@ Choose your operating system below for tailored instructions:
    ```
 4. **Install Requirements**:
    ```bash
-   pip install -r T2C_PickAndPlace/requirements.txt
+   pip install -r requirements.txt
    ```
 
 ---
@@ -102,15 +93,15 @@ Choose your operating system below for tailored instructions:
 
 ## 🚀 How to Run and Test
 
-1. **Activate Environment**: Ensure you are in the parent directory and your virtual environment is active.
+1. **Activate Environment**: Ensure you are inside the project directory and your virtual environment is active.
 2. **Launch the GUI**:
    * **Windows**:
      ```cmd
-     python T2C_PickAndPlace/gui_main.py
+     python gui_main.py
      ```
    * **Linux / macOS**:
      ```bash
-     python3 T2C_PickAndPlace/gui_main.py
+     python3 gui_main.py
      ```
 3. **Execution Steps inside the GUI**:
    * Click **Command Robot Arm**.

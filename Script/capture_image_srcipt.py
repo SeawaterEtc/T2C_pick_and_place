@@ -2,8 +2,19 @@ import cv2
 import os
 import shutil
 
-# Ensure the directory exists
-save_dir = 'C:/Users/USER/Learn_Coding/T2C_PickAndPlace/Data/RobotArmObjectCoordinate/tmp'
+# Dynamically locate project root
+def find_root_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = current_dir
+    while root_dir and not os.path.exists(os.path.join(root_dir, 'gui_main.py')):
+        parent = os.path.dirname(root_dir)
+        if parent == root_dir:
+            break
+        root_dir = parent
+    return root_dir
+
+ROOT_DIR = find_root_dir()
+save_dir = os.path.join(ROOT_DIR, 'Data', 'RobotArmObjectCoordinate', 'tmp')
 
 if os.path.exists(save_dir):
     shutil.rmtree(save_dir)
